@@ -377,6 +377,10 @@ app.get("/getlogs", (req, res) => {
   res.send(data);
 });
 
+app.get('/busadmin', function(req, res) {
+  res.render('buslist');
+});
+
 //google sign in -----------------------------------------------------
 
 app.post('/auth', (req, res) => {
@@ -410,4 +414,20 @@ app.post('/auth', (req, res) => {
     
   }
   verify().catch(console.error);
+});
+
+
+
+
+
+app.get("/buslogs", function (req, res) {
+  res.render("pages/logs");
+});
+
+app.get("/bussettings", function (req, res) {
+  res.render("pages/settings");
+});
+
+app.get("/buschanges1", function (req, res) {
+  res.render("pages/buschanges");
 });
