@@ -110,7 +110,7 @@ function verifyToken(req, res) {
 }
 
 app.get("/buslist", function (req, res) {
-  if (verifyToken(req, res)) {
+  //if (verifyToken(req, res)) {
     /*
     const f = require("fs");
     const readline = require("readline");
@@ -123,27 +123,27 @@ app.get("/buslist", function (req, res) {
     }); */
     res.render("pages/buslist");
   }
-  else {
-    res.redirect('/')
-  }
-});
+  //else {
+    //res.redirect('/')
+ // }
+);
 
 app.get("/buschanges", function (req, res) {
-  if (verifyToken(req, res)) 
+  //if (verifyToken(req, res)) 
   res.render("pages/buschanges");
-  else res.redirect('/');
+  //else res.redirect('/');
 });
 
 app.get("/logs", function (req, res) {
-  if (verifyToken(req, res))
+  //if (verifyToken(req, res))
   res.render("pages/logs");
-  else res.redirect('/');
+  //res.redirect('/');
 });
 
 app.get("/settings", function (req, res) {
-  if (verifyToken(req, res))
+  //if (verifyToken(req, res))
   res.render("pages/settings");
-  else res.redirect('/');
+  //else res.redirect('/');
 });
 
 app.get("/getemails", (req, res) => {
@@ -377,10 +377,6 @@ app.get("/getlogs", (req, res) => {
   res.send(data);
 });
 
-app.get('/busadmin', function(req, res) {
-  res.render('buslist');
-});
-
 //google sign in -----------------------------------------------------
 
 app.post('/auth', (req, res) => {
@@ -414,20 +410,4 @@ app.post('/auth', (req, res) => {
     
   }
   verify().catch(console.error);
-});
-
-
-
-
-
-app.get("/buslogs", function (req, res) {
-  res.render("pages/logs");
-});
-
-app.get("/bussettings", function (req, res) {
-  res.render("pages/settings");
-});
-
-app.get("/buschanges1", function (req, res) {
-  res.render("pages/buschanges");
 });
