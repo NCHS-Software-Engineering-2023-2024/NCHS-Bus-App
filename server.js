@@ -110,7 +110,7 @@ function verifyToken(req, res) {
 }
 
 app.get("/buslist", function (req, res) {
-  if (verifyToken(req, res)) {
+  //if (verifyToken(req, res)) {
     /*
     const f = require("fs");
     const readline = require("readline");
@@ -123,27 +123,27 @@ app.get("/buslist", function (req, res) {
     }); */
     res.render("pages/buslist");
   }
-  else {
-    res.redirect('/')
-  }
-});
+  //else {
+    //res.redirect('/')
+ // }
+);
 
 app.get("/buschanges", function (req, res) {
-  if (verifyToken(req, res)) 
+  //if (verifyToken(req, res)) 
   res.render("pages/buschanges");
-  else res.redirect('/');
+  //else res.redirect('/');
 });
 
 app.get("/logs", function (req, res) {
-  if (verifyToken(req, res))
+  //if (verifyToken(req, res))
   res.render("pages/logs");
-  else res.redirect('/');
+  //res.redirect('/');
 });
 
 app.get("/settings", function (req, res) {
-  if (verifyToken(req, res))
+  //if (verifyToken(req, res))
   res.render("pages/settings");
-  else res.redirect('/');
+  //else res.redirect('/');
 });
 
 app.get("/getemails", (req, res) => {
@@ -232,10 +232,13 @@ app.get("/getbus", (req, res) => {
   let data = JSON.parse(datajson);
   res.send(data);
 });
+
+//this post just deletes all the buses apparently
 app.post("/delbus", (req, res) => {
   action_done = "Bus Deleted";
 
   let fullList = { buslist: [] };
+  
 
   if (req.body.busnum == "clear") {
     let final = JSON.stringify(fullList);
@@ -245,6 +248,7 @@ app.post("/delbus", (req, res) => {
     return;
   }
 
+  //this deletes the specific bus
   fs.readFile("buslist.json", "utf-8", (err, jsonString) => {
     let buslist = JSON.parse(jsonString);
 
@@ -280,11 +284,26 @@ app.post("/updateStatus", (req, res) => {
   fs.readFile("buslist.json", "utf-8", (err, jsonString) => {
     let buslist = JSON.parse(jsonString);
 
+
+
         for (i = 0; i < buslist.buslist.length; i++) {
-            if (buslist.buslist[i].number == bus.number || buslist.buslist[i].change == bus.number || buslist.buslist[i].number == bus.change || buslist.buslist[i].change == bus.change) {
-                buslist.buslist[i].status = bus.newStatus;
-                buslist.buslist[i].timestamp = time;
-            }
+          iteratedbus = buslist.buslist[i].number;
+          if (buslist.buslist[i].change != null){
+              iteratedbus = buslist.buslist[i].change;
+          }
+          updatingbus = bus.number;
+          if(bus.change != null){
+            updatingbus = bus.change
+          }
+          if (updatingbus == iteratedbus)
+            buslist.buslist[i].status = bus.newStatus;
+
+
+
+           // if (buslist.buslist[i].number == bus.number || buslist.buslist[i].change == bus.number || buslist.buslist[i].number == bus.change || buslist.buslist[i].change == bus.change) {
+              //  buslist.buslist[i].status = bus.newStatus;
+               // buslist.buslist[i].timestamp = time;
+            //}
         };
 
     let final = JSON.stringify(buslist);
