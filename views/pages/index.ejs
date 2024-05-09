@@ -80,7 +80,6 @@
     <body>
 
         <button id="subscribe-button">Subscribe to Push Notifications</button>
-        <button id="send-notif_button">Send a test notification</button>
 
         <script>
 
@@ -118,43 +117,6 @@
 
                 console.log('Subscribed to Push Notification...');
             }
-
-            document.getElementById("send-notif_button").addEventListener('click', function(){
-                sendNotif();
-            });
-
-            async function sendNotif(){
-                try {
-                console.log("sending push notif");
-                const response = await fetch('/send-notification', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                // Include any necessary data for the push notification
-                // For example, the message you want to send
-                message: 'Hello from the client!'
-                })
-            });
-
-            // Check if the request was successful
-            if (response.ok) {
-                // Handle success
-                console.log('Push notification sent successfully');
-                // You can optionally show a success message to the user
-            } else {
-                // Handle errors
-                console.error('Failed to send push notification');
-                // You can show an error message to the user if needed
-            }
-            } catch (error) {
-            // Handle network errors or other exceptions
-            console.error('Error:', error);
-            // You can show an error message to the user if needed
-            }
-            };
-
 
 
         </script>
