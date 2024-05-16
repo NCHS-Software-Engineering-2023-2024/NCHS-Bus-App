@@ -3,14 +3,6 @@ var express = require("express");
 const ejs = require("ejs");
 
 require('dotenv').config();
-const AWS = require('aws-sdk');
-
-AWS.config.update({
-  region: 'us-east-1',
-  accessKeyId: process.env.ACCESS_KEY,
-  secretAccessKey: process.env.SECRET_KEY
-});
-
 
 
 // Initialise Express
@@ -93,6 +85,48 @@ connection.connect((err) => {
     })
   })
 })
+
+const connection2 = mysql.createConnection({
+  host: 'db.redhawks.us',
+  user: 'redhawks_bus',
+  password: 'cZiHGFRBkxRYM4fGfWeN',
+  database: 'redhawks_bus'
+});
+
+connection2.connect((err) => {
+  if (err) {
+    console.error('Error connecting to database.', err);
+    return;
+  }
+  console.log('Connected to the database.');
+
+  //SQL query to select all rows from the table
+  const sqlQuery = 'SELECT * FROM Whitelist';
+
+  //Execute query
+  connection2.query(sqlQuery,(queryErr,results) =>{
+    if(queryErr){
+      console.error('Error executing query:',queryErr);
+      connection2.end(); //close connection
+      return;
+    }
+
+    //array to store JSON objects
+
+    let emailist = { users: [] };
+    //loop through results
+    for (const row of results) {
+      emailist.users.push(row.email);
+    }
+
+    fs.writeFile("whitelist.json", JSON.stringify(emailist), (err) => {});
+
+      //close database connection
+      connection2.end();
+    })
+})
+
+
 
 //database stuff end
 
@@ -470,6 +504,45 @@ app.post("/updateStatus", (req, res) => {
 
     fs.writeFile("buslist.json", final, (err) => {});
 
+    const connection = mysql.createConnection({
+      host: 'db.redhawks.us',
+      user: 'redhawks_bus',
+      password: 'cZiHGFRBkxRYM4fGfWeN',
+      database: 'redhawks_bus'
+    });
+  
+    connection.connect((err) => {
+      if (err) {
+        console.error('Error connecting to database.', err);
+        return;
+      }
+      console.log('Connected to the database.');
+    
+      //SQL query to select all rows from the table
+      const sqlQuery = 'SELECT * FROM Subscriptions WHERE busNum = ' + bus.number;
+    
+      //Execute query
+      connection.query(sqlQuery,(queryErr,results) =>{
+        if(queryErr){
+          console.error('Error executing query:',queryErr);
+          connection.end(); //close connection
+          return;
+        }
+
+        for (const row of results) {
+          const payload = JSON.stringify({ title: 'Push Test' });
+          console.log(row.subscription);
+
+          webpush.sendNotification(JSON.parse(row.subscription), payload).catch(err => console.error(err));
+    
+          //add JSON object to array
+        }
+
+          //close database connection
+          connection.end();
+        })
+      })
+
     res.redirect("buslist");
   });
 });
@@ -602,66 +675,51 @@ app.post('/auth', (req, res) => {
 });
 
 //idk push notification stuff maybe if works idk
-const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
-const topicArn = 'arn:aws:sns:us-east-1:370820922438:Bus-App-Test';
 const webpush = require('web-push');
 
 
 //will prob have to put vapid key details in env later lol
-const publicVapidKey = 'BF7vkSzqQLlmZSSI1copZIdvNoAPhXotl7XOme8IrD09mzWgHIfUJscwr1WI-OcKGO8Z0raotu7MRoRMX_0bUN0';
-const privateVapidKey = 'GSyPCjTTt56uMMWTFz20-9KG3uSEucdOtXmT-WfvbtM';
+const publicVapidKey = 'BKwZwHIXofitiwaHEbYarw-dVvCOtTdJqKRuxPhGa6EqPsWx1DRnQiW79ZGCSj7-NhP5Rv-eio_beOuDTwJrYf0';
+const privateVapidKey = 'X91X3FZ4ZVAIMAJEYbZs7S8Pl8-RyOBb1Eim2uTq134';
 
 webpush.setVapidDetails('mailto:pjpaik@stu.naperville203.org', publicVapidKey, privateVapidKey);
 
 
 app.post('/subscribe', (req, res) => {
   const subscription = req.body;
-  const endpoint = subscription.endpoint; // Extract endpoint from subscription
-
-  console.log("run");
-
-  const params = {
-    Protocol: 'application', // Adjust if using a different protocol
-    TopicArn: topicArn,
-    Endpoint: endpoint
-  };
-
-  // Subscribe to the SNS topic
-  sns.subscribe(params).promise()
-      .then(data => {
-          console.log('Subscription ARN is ' + data.SubscriptionArn);
-          res.status(200).json({ message: 'Subscribed to SNS topic' });
-      })
-      .catch(err => {
-          console.error('Error subscribing to SNS topic:', err);
-          res.status(500).json({ error: 'Failed to subscribe to SNS topic' });
-      });
-  console.log("ran");
 
   const payload = JSON.stringify({ title: 'Push Test' });
 
   // Pass object into sendNotification
   webpush.sendNotification(subscription, payload).catch(err => console.error(err));
-});
 
-
-app.post('/send-notification',(req,res)=>{
-  const params = {
-    TopicArn: 'arn:aws:sns:us-east-1:370820922438:Bus-App-Test',
-    Message: 'This is a test notif from sns topic please work im begging',
-    Subject: 'Your notification subject', // Optional
-    /* MessageAttributes: {
-        'customKey': { DataType: 'String', StringValue: 'customValue' } // Optional message attributes
-    } */
-    };
-
-  sns.publish(params, (err, data) => {
-  if (err) {
-      console.error('Failed to publish message to SNS:', err);
-  } else {
-      console.log('Message published successfully:', data.MessageId);
-  }
+  const connection = mysql.createConnection({
+    host: 'db.redhawks.us',
+    user: 'redhawks_bus',
+    password: 'cZiHGFRBkxRYM4fGfWeN',
+    database: 'redhawks_bus'
   });
 
-
+  connection.connect((err) => {
+    if (err) {
+      console.error('Error connecting to database.', err);
+      return;
+    }
+    console.log('Connected to the database.');
+  
+    //SQL query to select all rows from the table
+    const sqlQuery = 'INSERT INTO Subscriptions (busNum, subscription) VALUES(?,?)';
+    let values = [3,JSON.stringify(subscription)];
+  
+    //Execute query
+    connection.query(sqlQuery,values,(queryErr,results) =>{
+      if(queryErr){
+        console.error('Error executing query:',queryErr);
+        connection.end(); //close connection
+        return;
+      }
+        //close database connection
+        connection.end();
+      })
+    })
 });
